@@ -1,5 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import CoordinateForm from './components/CoordinateForm';
 import BulkConverter from './components/BulkConverter';
 import MapDisplay from './components/MapDisplay';
@@ -8,10 +8,32 @@ import { Coordinates, CoordinateSystem, Hypothesis } from './types';
 import { getAllProjections, convertCoords } from './services/conversion';
 import { LayoutGrid, Layers, Globe2, Info, Map as MapIcon } from 'lucide-react';
 
-const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single');
+// Composant de Navigation interne pour utiliser le hook useLocation
+const Navigation: React.FC = () => {
+  const location = useLocation();
+  const isBulk = location.pathname === '/bulk';
+
+  return (
+    <nav className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+      <Link
+        to="/"
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${!isBulk ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+      >
+        <Layers size={16} /> Unitaire
+      </Link>
+      <Link
+        to="/bulk"
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isBulk ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+      >
+        <LayoutGrid size={16} /> Batch
+      </Link>
+    </nav>
+  );
+};
+
+// Le contenu principal de l'application
+const AppContent: React.FC = () => {
   const [hypotheses, setHypotheses] = useState<Hypothesis[]>([]);
-  // Valeurs initiales vides ou nulles pour forcer la carte sur la France
   const [inputCoords, setInputCoords] = useState<Coordinates | null>(null);
   const [currentSystem, setCurrentSystem] = useState<CoordinateSystem>(CoordinateSystem.LAMBERT_93);
 
@@ -48,6 +70,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-12">
+      {/* HEADER */}
       <header className="sticky top-0 z-50 glass border-b border-slate-200 py-4 px-6 mb-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -60,36 +83,27 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <nav className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-            <button 
-              onClick={() => setActiveTab('single')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'single' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              <Layers size={16} /> Unitaire
-            </button>
-            <button 
-              onClick={() => setActiveTab('bulk')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'bulk' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              <LayoutGrid size={16} /> Batch
-            </button>
-          </nav>
+          {/* Navigation avec les liens du Router */}
+          <Navigation />
         </div>
       </header>
 
+      {/* MAIN CONTENT WITH ROUTES */}
       <main className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 space-y-8">
-            {activeTab === 'single' ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                   <CoordinateForm 
-                     selectedSystem={currentSystem}
-                     onConvert={handleConvert} 
-                     onShowHypotheses={handleShowHypotheses} 
-                     onSystemChange={(sys) => setCurrentSystem(sys)}
-                   />
-                   <div className="space-y-4">
+            <Routes>
+              {/* ROUTE 1 : UNITAIRE (ACCUEIL) */}
+              <Route path="/" element={
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <CoordinateForm 
+                      selectedSystem={currentSystem}
+                      onConvert={handleConvert} 
+                      onShowHypotheses={handleShowHypotheses} 
+                      onSystemChange={(sys) => setCurrentSystem(sys)}
+                    />
+                    <div className="space-y-4">
                       <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-start gap-3">
                         <MapIcon className="text-blue-600 mt-1" size={20} />
                         <div>
@@ -108,15 +122,18 @@ const App: React.FC = () => {
                         hypotheses={hypotheses}
                         onSelectSystem={handleSelectSystem}
                       />
-                   </div>
-                </div>
-                {results.length > 0 && <ResultsTable results={results} />}
-              </>
-            ) : (
-              <BulkConverter />
-            )}
+                    </div>
+                  </div>
+                  {results.length > 0 && <ResultsTable results={results} />}
+                </>
+              } />
+
+              {/* ROUTE 2 : BATCH */}
+              <Route path="/bulk" element={<BulkConverter />} />
+            </Routes>
           </div>
 
+          {/* SIDEBAR (Commune aux deux vues) */}
           <div className="lg:col-span-4 space-y-8 sticky top-28">
             <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
               <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-4">
@@ -140,10 +157,4 @@ const App: React.FC = () => {
       </main>
 
       <footer className="max-w-7xl mx-auto mt-16 pt-8 px-6 border-t border-slate-200 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-        <p>© 2024 SpatialReference.org Integration - Engine by Proj4js</p>
-      </footer>
-    </div>
-  );
-};
-
-export default App;
+        <p>© 2024 SpatialReference.org Integration - Engine
