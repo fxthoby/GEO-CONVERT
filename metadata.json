@@ -1,0 +1,7 @@
+{
+  "name": "GeoConvert FR - Lambert & GNSS",
+  "description": "Une application professionnelle de conversion de coordonnées pour la France (Lambert 93, CC42-50) avec vérification intelligente via l'API Gemini et Google Maps.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
