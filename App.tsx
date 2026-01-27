@@ -157,4 +157,20 @@ const AppContent: React.FC = () => {
       </main>
 
       <footer className="max-w-7xl mx-auto mt-16 pt-8 px-6 border-t border-slate-200 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-        <p>© 2024 SpatialReference.org Integration - Engine
+        <p>© 2024 SpatialReference.org Integration - Engine by Proj4js</p>
+      </footer>
+    </div>
+  );
+};
+
+// Wrapper principal avec la configuration GitHub Pages
+const App: React.FC = () => {
+  return (
+    // IMPORTANT : basename doit correspondre au nom de votre repo GitHub
+    <BrowserRouter basename="/GEO-CONVERT">
+      <AppContent />
+    </BrowserRouter>
+  );
+};
+
+export default App;
