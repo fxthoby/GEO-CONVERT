@@ -2,58 +2,75 @@
 import React from 'react';
 import { Coordinates, CoordinateSystem } from '../types';
 import { SYSTEM_LABELS } from '../constants';
+import { Clipboard, Check, Database, Map as MapIcon } from 'lucide-react';
 
 interface Props {
   results: Coordinates[];
 }
 
 const ResultsTable: React.FC<Props> = ({ results }) => {
-  const copyToClipboard = (text: string) => {
+  const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null);
+
+  const copyToClipboard = (text: string, index: number) => {
     navigator.clipboard.writeText(text);
-    alert('Copié !');
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-        </svg>
-        Résultats de Conversion
-      </h2>
-      <div className="overflow-x-auto">
+    <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-green-50 text-green-600 rounded-lg">
+          <Database size={24} />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Coordonnées Transformées</h2>
+      </div>
+
+      <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-100">
-              <th className="py-3 px-4 text-sm font-semibold text-slate-500">Système</th>
-              <th className="py-3 px-4 text-sm font-semibold text-slate-500">X / Longitude</th>
-              <th className="py-3 px-4 text-sm font-semibold text-slate-500">Y / Latitude</th>
-              <th className="py-3 px-4 text-sm font-semibold text-slate-500">Action</th>
+              <th className="py-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Système de Référence</th>
+              <th className="py-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">X / Longitude</th>
+              <th className="py-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Y / Latitude</th>
+              <th className="py-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alt. (m)</th>
+              <th className="py-4 px-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {results.map((res) => (
-              <tr key={res.system} className="hover:bg-slate-50 transition-colors">
-                <td className="py-3 px-4">
-                  <span className={`text-sm font-medium ${res.system === CoordinateSystem.LAMBERT_93 ? 'text-blue-700' : 'text-slate-700'}`}>
-                    {SYSTEM_LABELS[res.system]}
+            {results.map((res, i) => (
+              <tr key={res.system} className="group hover:bg-slate-50/50 transition-all">
+                <td className="py-4 px-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-700">{SYSTEM_LABELS[res.system]}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{res.system}</span>
+                  </div>
+                </td>
+                <td className="py-4 px-4">
+                  <span className="font-mono text-sm text-slate-600">
+                    {res.system === CoordinateSystem.WGS84 ? res.x.toFixed(8) : res.x.toLocaleString('fr-FR', { minimumFractionDigits: 3 })}
                   </span>
                 </td>
-                <td className="py-3 px-4 font-mono text-sm">
-                  {res.system === CoordinateSystem.WGS84 ? res.x.toFixed(7) : res.x.toLocaleString('fr-FR', { minimumFractionDigits: 3 })}
+                <td className="py-4 px-4">
+                  <span className="font-mono text-sm text-slate-600">
+                    {res.system === CoordinateSystem.WGS84 ? res.y.toFixed(8) : res.y.toLocaleString('fr-FR', { minimumFractionDigits: 3 })}
+                  </span>
                 </td>
-                <td className="py-3 px-4 font-mono text-sm">
-                  {res.system === CoordinateSystem.WGS84 ? res.y.toFixed(7) : res.y.toLocaleString('fr-FR', { minimumFractionDigits: 3 })}
+                <td className="py-4 px-4">
+                   <div className="flex flex-col">
+                      <span className="font-mono text-xs text-slate-500">Ellip: {res.z?.toFixed(2) || '-'}</span>
+                      {res.h !== undefined && (
+                        <span className="font-bold text-[10px] text-blue-600 uppercase">RAF20: {res.h.toFixed(3)}m</span>
+                      )}
+                   </div>
                 </td>
-                <td className="py-3 px-4">
+                <td className="py-4 px-4 text-center">
                   <button 
-                    onClick={() => copyToClipboard(`${res.x}, ${res.y}`)}
-                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
-                    title="Copier les coordonnées"
+                    onClick={() => copyToClipboard(`${res.x}, ${res.y}${res.z ? `, ${res.z}` : ''}`, i)}
+                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all inline-flex items-center justify-center"
+                    title="Copier"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2v2M9 7v10.5a1.5 1.5 0 001.5 1.5h1.5" />
-                    </svg>
+                    {copiedIndex === i ? <Check size={18} className="text-green-500" /> : <Clipboard size={18} />}
                   </button>
                 </td>
               </tr>
