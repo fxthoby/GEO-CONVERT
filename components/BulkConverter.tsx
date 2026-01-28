@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { CoordinateSystem, BulkResult, Coordinates } from '../types';
-import { SYSTEM_LABELS } from '../constants';
+import { SYSTEM_LABELS, SORTED_SYSTEMS } from '../constants';
 import { processBulk, convertCoords } from '../services/conversion';
 import { FileText, Upload, Download, Trash2, CheckCircle2, ArrowRight } from 'lucide-react';
 
@@ -90,8 +89,8 @@ const BulkConverter: React.FC = () => {
                   onChange={(e) => setSourceSystem(e.target.value as CoordinateSystem)}
                   className="w-full p-4 bg-white border border-slate-200 rounded-xl text-xs font-black text-black shadow-sm outline-none focus:ring-4 focus:ring-slate-100"
                 >
-                  {Object.entries(SYSTEM_LABELS).map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
+                  {SORTED_SYSTEMS.map((v) => (
+                    <option key={v} value={v}>{SYSTEM_LABELS[v]}</option>
                   ))}
                 </select>
               </div>
@@ -109,8 +108,8 @@ const BulkConverter: React.FC = () => {
                   onChange={(e) => setTargetSystem(e.target.value as CoordinateSystem)}
                   className="w-full p-4 bg-white border border-slate-200 rounded-xl text-xs font-black text-black shadow-sm outline-none focus:ring-4 focus:ring-slate-100"
                 >
-                  {Object.entries(SYSTEM_LABELS).map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
+                  {SORTED_SYSTEMS.map((v) => (
+                    <option key={v} value={v}>{SYSTEM_LABELS[v]}</option>
                   ))}
                 </select>
               </div>

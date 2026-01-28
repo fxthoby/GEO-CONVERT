@@ -1,4 +1,3 @@
-
 import { CoordinateSystem } from './types';
 
 // Proj4 definitions (Source: spatialreference.org & IGN)
@@ -21,7 +20,7 @@ export const PROJ_DEFS: Record<CoordinateSystem, string> = {
   [CoordinateSystem.CC48]: '+proj=lcc +lat_1=47.25 +lat_2=48.75 +lat_0=48 +lon_0=3 +x_0=1700000 +y_0=7200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
   [CoordinateSystem.CC49]: '+proj=lcc +lat_1=48.25 +lat_2=49.75 +lat_0=49 +lon_0=3 +x_0=1700000 +y_0=8200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
   [CoordinateSystem.CC50]: '+proj=lcc +lat_1=49.25 +lat_2=50.75 +lat_0=50 +lon_0=3 +x_0=1700000 +y_0=9200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-  // EPSG:5720 is vertical but we handle horizontal as WGS84 by default for visualization
+  // Vertical
   [CoordinateSystem.NGF_IGN69]: '+proj=longlat +datum=WGS84 +no_defs',
 };
 
@@ -44,6 +43,26 @@ export const SYSTEM_LABELS: Record<CoordinateSystem, string> = {
   [CoordinateSystem.CC50]: 'Lambert CC50',
   [CoordinateSystem.NGF_IGN69]: 'Alt. NGF-IGN69',
 };
+
+// Ordre de tri strict : Lambert 93 > CC > Vieux NTF > WGS84
+export const SORTED_SYSTEMS: CoordinateSystem[] = [
+  CoordinateSystem.LAMBERT_93,
+  CoordinateSystem.CC42,
+  CoordinateSystem.CC43,
+  CoordinateSystem.CC44,
+  CoordinateSystem.CC45,
+  CoordinateSystem.CC46,
+  CoordinateSystem.CC47,
+  CoordinateSystem.CC48,
+  CoordinateSystem.CC49,
+  CoordinateSystem.CC50,
+  CoordinateSystem.LAMBERT_1,
+  CoordinateSystem.LAMBERT_2,
+  CoordinateSystem.LAMBERT_3,
+  CoordinateSystem.LAMBERT_4,
+  CoordinateSystem.LAMBERT_2_ETENDU,
+  CoordinateSystem.WGS84,
+];
 
 // RAF20 estimation: N = H_ellips - H_ortho
 export const estimateGeoidHeight = (lat: number, lng: number): number => {

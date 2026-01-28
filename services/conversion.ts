@@ -1,7 +1,6 @@
-
 import proj4 from 'proj4';
 import { Coordinates, CoordinateSystem, BulkResult, Hypothesis } from '../types';
-import { PROJ_DEFS, estimateGeoidHeight, SYSTEM_LABELS } from '../constants';
+import { PROJ_DEFS, estimateGeoidHeight, SYSTEM_LABELS, SORTED_SYSTEMS } from '../constants';
 
 export const convertCoords = (
   coords: { x: number; y: number; z?: number; h?: number },
@@ -41,8 +40,8 @@ export const convertCoords = (
 };
 
 export const getAllProjections = (input: Coordinates): Coordinates[] => {
-  return Object.values(CoordinateSystem)
-    .filter(s => s !== CoordinateSystem.NGF_IGN69)
+  // Utilise l'ordre de tri spécifié dans constants.ts
+  return SORTED_SYSTEMS
     .map(system => {
       return convertCoords({ x: input.x, y: input.y, z: input.z, h: input.h }, input.system, system);
     });
@@ -102,26 +101,8 @@ export const suggestSystem = (x: number, y: number): CoordinateSystem[] => {
 };
 
 export const getHypotheses = (x: number, y: number): Hypothesis[] => {
-  const commonSystems = [
-    CoordinateSystem.LAMBERT_93,
-    CoordinateSystem.LAMBERT_2_ETENDU,
-    CoordinateSystem.LAMBERT_1,
-    CoordinateSystem.LAMBERT_2,
-    CoordinateSystem.LAMBERT_3,
-    CoordinateSystem.LAMBERT_4,
-    CoordinateSystem.CC42,
-    CoordinateSystem.CC43,
-    CoordinateSystem.CC44,
-    CoordinateSystem.CC45,
-    CoordinateSystem.CC46,
-    CoordinateSystem.CC47,
-    CoordinateSystem.CC48,
-    CoordinateSystem.CC49,
-    CoordinateSystem.CC50,
-    CoordinateSystem.WGS84
-  ];
-
-  return commonSystems.map(sys => {
+  // Utilise l'ordre de tri pour les hypothèses également
+  return SORTED_SYSTEMS.map(sys => {
     try {
       const res = proj4(PROJ_DEFS[sys], PROJ_DEFS[CoordinateSystem.WGS84], [x, y]);
       if (res[0] > -15 && res[0] < 20 && res[1] > 30 && res[1] < 60) {

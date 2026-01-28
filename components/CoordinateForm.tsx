@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { CoordinateSystem, Coordinates, Hypothesis } from '../types';
-import { SYSTEM_LABELS, estimateGeoidHeight } from '../constants';
+import { SYSTEM_LABELS, estimateGeoidHeight, SORTED_SYSTEMS } from '../constants';
 import { suggestSystem, getHypotheses, convertCoords } from '../services/conversion';
 import { MapPin, Info, ArrowRight, Zap, SearchCode, Hash } from 'lucide-react';
 import proj4 from 'proj4';
@@ -192,8 +191,8 @@ const CoordinateForm: React.FC<Props> = ({ selectedSystem, onConvert, onShowHypo
                   onChange={(e) => onSystemChange(e.target.value as CoordinateSystem)}
                   className="w-full p-4.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-slate-100 focus:border-black outline-none appearance-none cursor-pointer font-bold text-black text-sm tracking-wider shadow-sm pr-14"
                 >
-                  {Object.entries(SYSTEM_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                  {SORTED_SYSTEMS.map((value) => (
+                    <option key={value} value={value}>{SYSTEM_LABELS[value]}</option>
                   ))}
                 </select>
                 <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#4a0404]">
