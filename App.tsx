@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import CoordinateForm from './components/CoordinateForm';
@@ -137,7 +136,7 @@ const AppContent: React.FC = () => {
               </div>
               <h2 className="text-2xl font-black text-black tracking-tight uppercase">Normes Géodésiques & IGN</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-16 items-start">
               <div className="space-y-4">
                 <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Planimétrie</h4>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium">

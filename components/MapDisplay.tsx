@@ -1,7 +1,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { Hypothesis, CoordinateSystem } from '../types';
+import { Hypothesis, CoordinateSystem, Coordinates } from '../types';
+import { getAllProjections } from '../services/conversion';
+import { SYSTEM_LABELS } from '../constants';
 
 interface Props {
   lat: number;
@@ -30,7 +32,6 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         fadeAnimation: true
       }).setView([initialLat, initialLng], initialZoom);
 
-      // Utilisation d'OpenStreetMap standard pour une fiabilité maximale
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors'
@@ -50,7 +51,67 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
       
       layerGroupRef.current = L.layerGroup().addTo(mapRef.current);
 
-      // Correction de la taille après un léger délai
+      // --- NOUVELLE FONCTIONNALITÉ : CLIC CARTE ---
+      mapRef.current.on('click', (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+        
+        // Calcul des projections pour le point cliqué
+        const input: Coordinates = {
+          x: lng,
+          y: lat,
+          system: CoordinateSystem.WGS84
+        };
+        const projections = getAllProjections(input);
+
+        // Construction du contenu HTML du popup
+        let popupHtml = `
+          <div class="p-2 custom-scrollbar" style="max-height: 350px; overflow-y: auto; width: 280px; font-family: Calibri, sans-serif;">
+            <div class="flex items-center gap-2 mb-4 sticky top-0 bg-white pb-2 border-b border-slate-100 z-10">
+              <div style="width: 8px; height: 8px; background: #4a0404; border-radius: 50%;"></div>
+              <span class="text-[11px] font-black uppercase tracking-widest text-black">Coordonnées du point</span>
+            </div>
+            <div class="space-y-3">
+        `;
+
+        projections.forEach(p => {
+          const isWGS = p.system === CoordinateSystem.WGS84;
+          const label = SYSTEM_LABELS[p.system];
+          const xVal = isWGS ? p.x.toFixed(7) : Math.round(p.x * 100) / 100;
+          const yVal = isWGS ? p.y.toFixed(7) : Math.round(p.y * 100) / 100;
+          
+          popupHtml += `
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 group">
+              <div class="text-[9px] font-black text-[#4a0404] uppercase tracking-wider mb-1">${label}</div>
+              <div class="flex flex-col gap-0.5 font-mono text-[10px] text-black font-bold">
+                <div class="flex justify-between">
+                  <span class="text-slate-400">X:</span>
+                  <span>${xVal}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400">Y:</span>
+                  <span>${yVal}</span>
+                </div>
+                ${p.h !== undefined ? `
+                <div class="flex justify-between mt-1 text-[#4a0404]">
+                  <span class="opacity-50">NGF:</span>
+                  <span>${p.h.toFixed(2)}m</span>
+                </div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        popupHtml += `</div></div>`;
+
+        L.popup({
+          maxWidth: 320,
+          className: 'custom-map-popup'
+        })
+        .setLatLng(e.latlng)
+        .setContent(popupHtml)
+        .openOn(mapRef.current!);
+      });
+
       setTimeout(() => {
         if (mapRef.current) mapRef.current.invalidateSize();
       }, 250);
@@ -76,7 +137,6 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
       if (markerRef.current) markerRef.current.setOpacity(0);
     }
     
-    // S'assurer que la carte recalcule sa taille si la visibilité change
     mapRef.current.invalidateSize();
   }, [lat, lng, isDefault]);
 
