@@ -104,7 +104,7 @@ const CoordinateForm: React.FC<Props> = ({ selectedSystem, onConvert, onShowHypo
           </div>
           <div>
             <h2 className="text-2xl font-black text-black tracking-tighter uppercase leading-none">Saisie Directe</h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Vecteurs Numériques & Altimétrie</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Coordonnées planimétriques et altimétriques</p>
           </div>
         </div>
 
