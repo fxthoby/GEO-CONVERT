@@ -72,7 +72,7 @@ const AppContent: React.FC = () => {
               onClick={() => setActiveTab('bulk')}
               className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'bulk' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
             >
-              <LayoutGrid size={14} /> Batch
+              <LayoutGrid size={14} /> Par lot
             </button>
           </nav>
         </div>
@@ -137,20 +137,20 @@ const AppContent: React.FC = () => {
               <h2 className="text-2xl font-black text-black tracking-tight uppercase">Normes Géodésiques & IGN</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 items-start">
-              <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Planimétrie</h4>
+              <div className="flex flex-col h-full space-y-4">
+                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em] min-h-[1.5em] flex items-center">Planimétrie</h4>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium">
                   Intégration des grilles de transformation <b>NTF (IGN)</b>. Support rigoureux du Lambert 93 et des projections Coniques Conformes CC42-50.
                 </p>
               </div>
-              <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Altimétrie</h4>
+              <div className="flex flex-col h-full space-y-4">
+                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em] min-h-[1.5em] flex items-center">Altimétrie</h4>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium">
                   Référencement <b>NGF-IGN69</b> via interpolation sur le modèle <b>RAF20</b>. Précision optimale pour les levés topographiques.
                 </p>
               </div>
-              <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Intégrité</h4>
+              <div className="flex flex-col h-full space-y-4">
+                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em] min-h-[1.5em] flex items-center">Intégrité</h4>
                 <p className="text-sm text-slate-600 leading-relaxed font-medium italic">
                   Les calculs respectent les spécifications de l'EPSG et sont validés par des tests de régression croisés garantissant l'intégrité des levés.
                 </p>
