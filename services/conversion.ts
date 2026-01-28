@@ -4,7 +4,7 @@ import { Coordinates, CoordinateSystem, BulkResult, Hypothesis } from '../types'
 import { PROJ_DEFS, estimateGeoidHeight, SYSTEM_LABELS } from '../constants';
 
 export const convertCoords = (
-  coords: { x: number; y: number; z?: number },
+  coords: { x: number; y: number; z?: number; h?: number },
   from: CoordinateSystem,
   to: CoordinateSystem
 ): Coordinates => {
@@ -13,21 +13,29 @@ export const convertCoords = (
   
   const result = proj4(fromDef, toDef, [coords.x, coords.y]);
   
+  const fromWgs = (from === CoordinateSystem.WGS84) 
+    ? [coords.x, coords.y] 
+    : proj4(fromDef, PROJ_DEFS[CoordinateSystem.WGS84], [coords.x, coords.y]);
+  
+  const N = estimateGeoidHeight(fromWgs[1], fromWgs[0]);
+
+  let ellipsoidalZ = coords.z;
+  let orthometricH = coords.h;
+
+  // Sync heights if one is missing
+  if (ellipsoidalZ !== undefined && orthometricH === undefined) {
+    orthometricH = ellipsoidalZ - N;
+  } else if (orthometricH !== undefined && ellipsoidalZ === undefined) {
+    ellipsoidalZ = orthometricH + N;
+  }
+
   const finalCoords: Coordinates = {
     x: result[0],
     y: result[1],
-    z: coords.z,
+    z: ellipsoidalZ,
+    h: orthometricH,
     system: to
   };
-
-  const wgs = (to === CoordinateSystem.WGS84 || to === CoordinateSystem.NGF_IGN69)
-    ? [result[0], result[1]] 
-    : proj4(fromDef, PROJ_DEFS[CoordinateSystem.WGS84], [coords.x, coords.y]);
-    
-  const N = estimateGeoidHeight(wgs[1], wgs[0]);
-  if (coords.z !== undefined) {
-    finalCoords.h = coords.z - N;
-  }
 
   return finalCoords;
 };
@@ -36,7 +44,7 @@ export const getAllProjections = (input: Coordinates): Coordinates[] => {
   return Object.values(CoordinateSystem)
     .filter(s => s !== CoordinateSystem.NGF_IGN69)
     .map(system => {
-      return convertCoords({ x: input.x, y: input.y, z: input.z }, input.system, system);
+      return convertCoords({ x: input.x, y: input.y, z: input.z, h: input.h }, input.system, system);
     });
 };
 
@@ -50,7 +58,7 @@ export const processBulk = (text: string, defaultSystem: CoordinateSystem): Bulk
       const input: Coordinates = {
         x: parts[0],
         y: parts[1],
-        z: parts[2],
+        z: parts[2], // Assume 3rd part is ellipsoidal for bulk
         system: defaultSystem
       };
       

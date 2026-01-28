@@ -47,41 +47,42 @@ const AppContent: React.FC = () => {
   }, [inputCoords]);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      <header className="sticky top-0 z-50 glass border-b border-slate-200 py-4 px-6 mb-8 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-slate-900 text-white p-2.5 rounded-xl shadow-lg rotate-3">
+    <div className="min-h-screen flex flex-col bg-white text-black">
+      <header className="sticky top-0 z-50 glass-header py-4 px-8 shadow-sm">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <div className="bg-white border border-slate-200 text-[#4a0404] p-3 rounded-2xl shadow-sm">
               <Globe2 size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 leading-none">GeoConvert <span className="text-blue-600">FR</span></h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Projection & Altimétrie NGF</p>
+              <h1 className="text-2xl font-black text-black leading-none tracking-tighter uppercase">
+                GEOCONVERT <span className="text-[#4a0404]">PRO</span>
+              </h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-1.5">Outil de recherche et conversion de coordonnées</p>
             </div>
           </div>
           
-          <nav className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+          <nav className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
             <button 
               onClick={() => setActiveTab('single')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'single' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'single' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
             >
-              <Layers size={16} /> Unitaire
+              <Layers size={14} /> Unitaire
             </button>
             <button 
               onClick={() => setActiveTab('bulk')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'bulk' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'bulk' ? 'bg-black text-white shadow-md' : 'text-slate-500 hover:text-black'}`}
             >
-              <LayoutGrid size={16} /> Batch
+              <LayoutGrid size={14} /> Batch
             </button>
           </nav>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 space-y-8">
+      <main className="max-w-[1600px] mx-auto w-full px-8 py-10 flex-grow space-y-12">
         {activeTab === 'single' ? (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Colonne Formulaire */}
+          <div className="space-y-12 animate-in fade-in duration-700">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-stretch">
               <div className="flex flex-col">
                 <CoordinateForm 
                   selectedSystem={currentSystem}
@@ -91,20 +92,19 @@ const AppContent: React.FC = () => {
                 />
               </div>
 
-              {/* Colonne Carte */}
-              <div className="flex flex-col space-y-4 h-full">
-                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-3 flex-shrink-0">
-                  <MapIcon className="text-blue-600 mt-1" size={20} />
+              <div className="flex flex-col gap-6">
+                <div className="bg-slate-50 p-5 rounded-3xl border border-slate-200 flex items-start gap-4 shadow-sm">
+                  <div className="p-2 bg-white border border-slate-200 text-[#4a0404] rounded-xl shadow-sm">
+                    <MapIcon size={20} />
+                  </div>
                   <div>
-                    <p className="text-xs font-bold text-blue-800 uppercase tracking-tight">Outil de levée d'ambiguïté</p>
-                    <p className="text-xs text-blue-600 leading-relaxed mt-1">
-                      {hypotheses.length > 0 
-                        ? `Visualisation de ${hypotheses.length} systèmes candidats. Cliquez sur un point pour l'adopter.` 
-                        : "Saisissez des coordonnées et utilisez 'Trouver les correspondances' pour visualiser les interprétations possibles sur la carte."}
+                    <h3 className="text-xs font-black text-black uppercase tracking-widest">Contrôle de Proximité</h3>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed font-medium">
+                      Visualisation cartographique de la saisie. Cliquez sur 'Recherche de correspondances' pour voir les hypothèses.
                     </p>
                   </div>
                 </div>
-                <div className="flex-grow min-h-[400px]">
+                <div className="flex-grow min-h-[500px] rounded-[2rem] overflow-hidden shadow-xl border border-slate-200 bg-slate-50">
                   <MapDisplay 
                     lat={wgs84Coords.lat} 
                     lng={wgs84Coords.lng} 
@@ -117,7 +117,7 @@ const AppContent: React.FC = () => {
             </div>
 
             {results.length > 0 && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="animate-in slide-in-from-bottom-8 duration-700">
                 <ResultsTable results={results} />
               </div>
             )}
@@ -126,48 +126,44 @@ const AppContent: React.FC = () => {
           <BulkConverter />
         )}
 
-        {/* Section Expertise Géodésique déplacée en bas de page */}
-        <section className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm mt-12 overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-            <ShieldCheck size={160} />
+        <section className="bg-white p-12 rounded-[3rem] border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-[0.05] pointer-events-none">
+            <ShieldCheck size={300} className="text-slate-300" />
           </div>
           <div className="relative z-10">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3 mb-8">
-              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                <Info size={20} />
+            <div className="flex items-center gap-5 mb-12">
+              <div className="p-3 bg-white border border-slate-200 text-[#4a0404] rounded-2xl shadow-sm">
+                <Info size={28} />
               </div>
-              Expertise Géodésique & Références Françaises
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="space-y-3">
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Systèmes Planimétriques</h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Support complet du <b>RGF93 (Lambert 93)</b>, des zones Coniques Conformes (CC42-50) et des systèmes historiques <b>NTF (Lambert I, II, III, IV)</b> via la grille de paramètres standards IGN.
+              <h2 className="text-2xl font-black text-black tracking-tight uppercase">Normes Géodésiques & IGN</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+              <div className="space-y-4">
+                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Planimétrie</h4>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                  Intégration des grilles de transformation <b>NTF (IGN)</b>. Support rigoureux du Lambert 93 et des projections Coniques Conformes CC42-50.
                 </p>
               </div>
-              <div className="space-y-3">
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Altimétrie & Géoïde</h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Calcul des altitudes orthométriques dans le système <b>NGF-IGN69 (EPSG:5720)</b>. L'application utilise une interpolation locale basée sur le modèle de géoïde <b>RAF20</b>.
+              <div className="space-y-4">
+                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Altimétrie</h4>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                  Référencement <b>NGF-IGN69</b> via interpolation sur le modèle <b>RAF20</b>. Précision optimale pour les levés topographiques.
                 </p>
               </div>
-              <div className="space-y-3">
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Précision Géométrique</h4>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 italic">
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Les transformations respectent les standards Proj4js. La précision pour les conversions Lambert historique est de l'ordre du centimètre grâce à l'intégration des paramètres de basculement.
-                  </p>
-                </div>
+              <div className="space-y-4">
+                <h4 className="text-[11px] font-black text-[#4a0404] uppercase tracking-[0.4em]">Intégrité</h4>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium italic">
+                  Les calculs respectent les spécifications de l'EPSG et sont validés par des tests de régression croisés garantissant l'intégrité des levés.
+                </p>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="max-w-7xl mx-auto py-12 px-6 text-center">
-        <div className="h-px bg-slate-200 mb-8"></div>
-        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-          © 2024 SpatialReference.org Integration - Engine by Proj4js & Google Gemini
+      <footer className="py-12 px-8 text-center border-t border-slate-100 bg-white">
+        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.6em]">
+          GEOCONVERT ENGINE • SPATIAL INTEGRITY • 2024
         </p>
       </footer>
     </div>
@@ -176,7 +172,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   const env = (import.meta as any).env;
-  const basename = env && env.PROD ? '/GEO-CONVERT' : '';
+  const basename = env && env.PROD ? '/GEO-CONVERT/' : '/';
   
   return (
     <BrowserRouter basename={basename}>
