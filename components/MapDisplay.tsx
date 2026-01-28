@@ -25,7 +25,6 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
 
   useEffect(() => {
     if (!mapRef.current && mapContainerRef.current) {
-      // Initialisation de la carte
       mapRef.current = L.map(mapContainerRef.current, {
         zoomControl: false,
         attributionControl: false,
@@ -51,11 +50,10 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
       
       layerGroupRef.current = L.layerGroup().addTo(mapRef.current);
 
-      // --- NOUVELLE FONCTIONNALITÉ : CLIC CARTE ---
+      // Fonctionnalité de clic pour conversion instantanée
       mapRef.current.on('click', (e: L.LeafletMouseEvent) => {
         const { lat, lng } = e.latlng;
         
-        // Calcul des projections pour le point cliqué
         const input: Coordinates = {
           x: lng,
           y: lat,
@@ -63,12 +61,11 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         };
         const projections = getAllProjections(input);
 
-        // Construction du contenu HTML du popup
         let popupHtml = `
-          <div class="p-2 custom-scrollbar" style="max-height: 350px; overflow-y: auto; width: 280px; font-family: Calibri, sans-serif;">
-            <div class="flex items-center gap-2 mb-4 sticky top-0 bg-white pb-2 border-b border-slate-100 z-10">
-              <div style="width: 8px; height: 8px; background: #4a0404; border-radius: 50%;"></div>
-              <span class="text-[11px] font-black uppercase tracking-widest text-black">Coordonnées du point</span>
+          <div class="p-2 custom-scrollbar" style="max-height: 400px; overflow-y: auto; width: 300px; font-family: Calibri, sans-serif;">
+            <div class="flex items-center gap-2 mb-4 sticky top-0 bg-white pb-3 border-b border-slate-100 z-10">
+              <div style="width: 10px; height: 10px; background: #4a0404; border-radius: 50%;"></div>
+              <span class="text-[11px] font-black uppercase tracking-widest text-black">Point sélectionné</span>
             </div>
             <div class="space-y-3">
         `;
@@ -76,25 +73,25 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         projections.forEach(p => {
           const isWGS = p.system === CoordinateSystem.WGS84;
           const label = SYSTEM_LABELS[p.system];
-          const xVal = isWGS ? p.x.toFixed(7) : Math.round(p.x * 100) / 100;
-          const yVal = isWGS ? p.y.toFixed(7) : Math.round(p.y * 100) / 100;
+          const xVal = isWGS ? p.x.toFixed(7) : Math.round(p.x * 1000) / 1000;
+          const yVal = isWGS ? p.y.toFixed(7) : Math.round(p.y * 1000) / 1000;
           
           popupHtml += `
-            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 group">
-              <div class="text-[9px] font-black text-[#4a0404] uppercase tracking-wider mb-1">${label}</div>
-              <div class="flex flex-col gap-0.5 font-mono text-[10px] text-black font-bold">
-                <div class="flex justify-between">
-                  <span class="text-slate-400">X:</span>
+            <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-slate-100">
+              <div class="text-[9px] font-black text-[#4a0404] uppercase tracking-wider mb-2">${label}</div>
+              <div class="flex flex-col gap-1 font-mono text-[10px] text-black font-bold">
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400 font-medium">X/Long:</span>
                   <span>${xVal}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-slate-400">Y:</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400 font-medium">Y/Lat:</span>
                   <span>${yVal}</span>
                 </div>
                 ${p.h !== undefined ? `
-                <div class="flex justify-between mt-1 text-[#4a0404]">
+                <div class="flex justify-between items-center mt-1 pt-1 border-t border-slate-200/50 text-[#4a0404]">
                   <span class="opacity-50">NGF:</span>
-                  <span>${p.h.toFixed(2)}m</span>
+                  <span>${p.h.toFixed(3)}m</span>
                 </div>` : ''}
               </div>
             </div>
@@ -104,7 +101,7 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         popupHtml += `</div></div>`;
 
         L.popup({
-          maxWidth: 320,
+          maxWidth: 340,
           className: 'custom-map-popup'
         })
         .setLatLng(e.latlng)
