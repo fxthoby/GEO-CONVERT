@@ -1,8 +1,7 @@
 
+import proj4 from 'proj4';
 import { Coordinates, CoordinateSystem, BulkResult, Hypothesis } from '../types';
 import { PROJ_DEFS, estimateGeoidHeight, SYSTEM_LABELS } from '../constants';
-
-declare var proj4: any;
 
 export const convertCoords = (
   coords: { x: number; y: number; z?: number },
@@ -95,7 +94,6 @@ export const suggestSystem = (x: number, y: number): CoordinateSystem[] => {
 };
 
 export const getHypotheses = (x: number, y: number): Hypothesis[] => {
-  // Try many systems to be sure we find a plausible location in/near France
   const commonSystems = [
     CoordinateSystem.LAMBERT_93,
     CoordinateSystem.LAMBERT_2_ETENDU,
@@ -118,7 +116,6 @@ export const getHypotheses = (x: number, y: number): Hypothesis[] => {
   return commonSystems.map(sys => {
     try {
       const res = proj4(PROJ_DEFS[sys], PROJ_DEFS[CoordinateSystem.WGS84], [x, y]);
-      // Only keep if result is somewhat plausible for France region (+ some margin)
       if (res[0] > -15 && res[0] < 20 && res[1] > 30 && res[1] < 60) {
         return {
           system: sys,
@@ -131,5 +128,5 @@ export const getHypotheses = (x: number, y: number): Hypothesis[] => {
     } catch (e) {
       return null;
     }
-  }).filter(h => h !== null) as Hypothesis[];
+  }).filter((h): h is Hypothesis => h !== null);
 };

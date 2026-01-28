@@ -1,8 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { Hypothesis, CoordinateSystem } from '../types';
-
-declare var L: any;
 
 interface Props {
   lat: number;
@@ -14,9 +13,9 @@ interface Props {
 
 const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem, isDefault }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
-  const layerGroupRef = useRef<any>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   // Zoom France par défaut : ~46.5, 2.5
   const initialLat = 46.5;
@@ -27,7 +26,7 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
     if (!mapRef.current && mapContainerRef.current) {
       mapRef.current = L.map(mapContainerRef.current).setView([initialLat, initialLng], initialZoom);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(mapRef.current);
       
       markerRef.current = L.marker([initialLat, initialLng], { opacity: 0 }).addTo(mapRef.current);
@@ -45,7 +44,6 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
       }
     } else {
       if (markerRef.current) markerRef.current.setOpacity(0);
-      // Ne pas forcer le zoom 6 si l'utilisateur a déjà bougé la carte, sauf au premier rendu default
       if (mapRef.current.getZoom() === initialZoom) {
          mapRef.current.setView([initialLat, initialLng], initialZoom);
       }
@@ -57,7 +55,7 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
       layerGroupRef.current.clearLayers();
       
       if (hypotheses.length > 0) {
-        const bounds = L.latLngBounds();
+        const bounds = L.latLngBounds([]);
         hypotheses.forEach(h => {
           const m = L.circleMarker([h.lat, h.lng], {
             radius: 12,
@@ -71,21 +69,21 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
             <div class="text-center p-1">
               <div class="font-bold text-slate-800 text-sm mb-1">${h.label}</div>
               <div class="text-[10px] text-slate-500 mb-2 font-mono">${h.system}</div>
-              <button id="select-sys-${h.system.replace(':', '-')}" class="w-full bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+              <button id="select-sys-${h.system.replace(/:/g, '-')}" class="w-full bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
                 Choisir ce système
               </button>
             </div>
           `, { minWidth: 150 })
-          .addTo(layerGroupRef.current);
+          .addTo(layerGroupRef.current!);
           
           m.on('popupopen', () => {
-            const btnId = `select-sys-${h.system.replace(':', '-')}`;
+            const btnId = `select-sys-${h.system.replace(/:/g, '-')}`;
             const btn = document.getElementById(btnId);
             if (btn && onSelectSystem) {
               btn.onclick = (e) => {
                 e.preventDefault();
                 onSelectSystem(h.system);
-                mapRef.current.closePopup();
+                mapRef.current?.closePopup();
               };
             }
           });
