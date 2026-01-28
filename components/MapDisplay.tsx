@@ -18,10 +18,10 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
   const markerRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
 
-  // France Center: ~46.5, 2.5
-  const initialLat = isDefault ? 46.5 : lat;
-  const initialLng = isDefault ? 2.5 : lng;
-  const initialZoom = isDefault ? 6 : 13;
+  // Zoom France par défaut : ~46.5, 2.5
+  const initialLat = 46.5;
+  const initialLng = 2.5;
+  const initialZoom = 6;
 
   useEffect(() => {
     if (!mapRef.current && mapContainerRef.current) {
@@ -30,16 +30,24 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapRef.current);
       
-      markerRef.current = L.marker([initialLat, initialLng], { opacity: isDefault ? 0 : 1 }).addTo(mapRef.current);
+      markerRef.current = L.marker([initialLat, initialLng], { opacity: 0 }).addTo(mapRef.current);
       layerGroupRef.current = L.layerGroup().addTo(mapRef.current);
-    } else if (mapRef.current) {
-      if (!isDefault) {
-        mapRef.current.setView([lat, lng], mapRef.current.getZoom() < 10 ? 13 : mapRef.current.getZoom());
-        if (markerRef.current) {
-          markerRef.current.setLatLng([lat, lng]).setOpacity(1);
-        }
-      } else {
-         markerRef.current.setOpacity(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    if (!isDefault) {
+      mapRef.current.setView([lat, lng], mapRef.current.getZoom() < 8 ? 13 : mapRef.current.getZoom());
+      if (markerRef.current) {
+        markerRef.current.setLatLng([lat, lng]).setOpacity(1);
+      }
+    } else {
+      if (markerRef.current) markerRef.current.setOpacity(0);
+      // Ne pas forcer le zoom 6 si l'utilisateur a déjà bougé la carte, sauf au premier rendu default
+      if (mapRef.current.getZoom() === initialZoom) {
+         mapRef.current.setView([initialLat, initialLng], initialZoom);
       }
     }
   }, [lat, lng, isDefault]);
@@ -52,7 +60,7 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         const bounds = L.latLngBounds();
         hypotheses.forEach(h => {
           const m = L.circleMarker([h.lat, h.lng], {
-            radius: 10,
+            radius: 12,
             fillColor: "#3b82f6",
             color: "#fff",
             weight: 3,
@@ -60,20 +68,22 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
             fillOpacity: 0.9
           })
           .bindPopup(`
-            <div class="text-center">
+            <div class="text-center p-1">
               <div class="font-bold text-slate-800 text-sm mb-1">${h.label}</div>
-              <div class="text-[10px] text-slate-500 mb-2">${h.system}</div>
-              <button id="select-sys-${h.system.replace(':', '-')}" class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded hover:bg-blue-700 transition-colors">
+              <div class="text-[10px] text-slate-500 mb-2 font-mono">${h.system}</div>
+              <button id="select-sys-${h.system.replace(':', '-')}" class="w-full bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
                 Choisir ce système
               </button>
             </div>
-          `)
+          `, { minWidth: 150 })
           .addTo(layerGroupRef.current);
           
           m.on('popupopen', () => {
-            const btn = document.getElementById(`select-sys-${h.system.replace(':', '-')}`);
+            const btnId = `select-sys-${h.system.replace(':', '-')}`;
+            const btn = document.getElementById(btnId);
             if (btn && onSelectSystem) {
-              btn.onclick = () => {
+              btn.onclick = (e) => {
+                e.preventDefault();
                 onSelectSystem(h.system);
                 mapRef.current.closePopup();
               };
@@ -100,8 +110,8 @@ const MapDisplay: React.FC<Props> = ({ lat, lng, hypotheses = [], onSelectSystem
         </div>
       )}
       {hypotheses.length > 0 && (
-        <div className="absolute top-4 right-4 z-[1000] bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg animate-bounce">
-          {hypotheses.length} hypothèses trouvées
+        <div className="absolute top-4 right-4 z-[1000] bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg animate-bounce border border-white/20">
+          {hypotheses.length} correspondances trouvées
         </div>
       )}
     </div>

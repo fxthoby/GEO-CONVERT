@@ -13,7 +13,7 @@ interface Props {
 }
 
 const CoordinateForm: React.FC<Props> = ({ selectedSystem, onConvert, onShowHypotheses, onSystemChange }) => {
-  // Champs vides par défaut
+  // Champs vides par défaut comme demandé
   const [x, setX] = useState<string>('');
   const [y, setY] = useState<string>('');
   const [z, setZ] = useState<string>('');
@@ -41,8 +41,11 @@ const CoordinateForm: React.FC<Props> = ({ selectedSystem, onConvert, onShowHypo
 
   const handleShowHypotheses = (e: React.MouseEvent) => {
     e.preventDefault();
-    const numX = parseFloat(x.replace(',', '.'));
-    const numY = parseFloat(y.replace(',', '.'));
+    const cleanX = x.replace(',', '.').trim();
+    const cleanY = y.replace(',', '.').trim();
+    const numX = parseFloat(cleanX);
+    const numY = parseFloat(cleanY);
+    
     if (!isNaN(numX) && !isNaN(numY)) {
       const h = getHypotheses(numX, numY);
       onShowHypotheses(h);
@@ -135,12 +138,13 @@ const CoordinateForm: React.FC<Props> = ({ selectedSystem, onConvert, onShowHypo
             </div>
           </div>
 
+          {/* Bouton déplacé sous les champs et renommé comme demandé */}
           <div className="space-y-3 pt-2">
             <button 
               type="button"
-              disabled={!x || !y}
+              disabled={!x.trim() || !y.trim()}
               onClick={handleShowHypotheses}
-              className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-100 hover:bg-blue-200 disabled:bg-slate-50 disabled:text-slate-300 text-blue-700 rounded-xl text-sm font-bold transition-all active:scale-[0.98] border border-blue-200"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-300 text-white rounded-xl text-sm font-bold transition-all active:scale-[0.98] shadow-md disabled:shadow-none border border-blue-700 disabled:border-slate-200"
               title="Affiche sur la carte toutes les interprétations possibles de ces chiffres"
             >
               <SearchCode size={18} />
@@ -149,7 +153,7 @@ const CoordinateForm: React.FC<Props> = ({ selectedSystem, onConvert, onShowHypo
 
             <button 
               type="submit"
-              disabled={!x || !y}
+              disabled={!x.trim() || !y.trim()}
               className="group w-full bg-slate-900 hover:bg-black disabled:bg-slate-200 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-2xl transform active:scale-[0.98] transition-all flex items-center justify-center gap-3"
             >
               Lancer la Conversion
